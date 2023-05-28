@@ -54,7 +54,7 @@ struct CharactersListView: View {
                             selectedCharacter = character
                             isShowingDetails = true
                         }){
-                            Image(systemName: "arrow.right")
+                            Image("arrow")
                                 .font(.caption)
                                 .foregroundColor(.gray)
                         }

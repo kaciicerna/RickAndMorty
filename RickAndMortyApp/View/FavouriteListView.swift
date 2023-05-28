@@ -6,16 +6,48 @@
 //
 
 import SwiftUI
+import CoreData
 
-struct FavouriteListView: View {
+struct FavoritesListView: View {
+    @Environment(\.managedObjectContext) private var viewContext
+    @FetchRequest(entity: FavoriteCharacter.entity(), sortDescriptors: []) var favorites: FetchedResults<FavoriteCharacter>
     
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        NavigationView {
+            List {
+                ForEach(favorites) { favorite in
+                    NavigationLink(destination: CharacterDetailView(name: favorite.name ?? "",
+                                                                    status: favorite.status ?? "",
+                                                                    species: favorite.species ?? "",
+                                                                    type: "",
+                                                                    gender: "",
+                                                                    origin: "",
+                                                                    location: "",
+                                                                    imageURL: "")) {
+                    }
+                }
+                .onDelete(perform: deleteFavorites)
+            }
+            .navigationBarTitle("Favorites")
+        }
+    }
+    
+    private func deleteFavorites(at offsets: IndexSet) {
+        offsets.forEach { index in
+            let favorite = favorites[index]
+            viewContext.delete(favorite)
+            
+            do {
+                try viewContext.save()
+            } catch {
+                // Handle save error
+            }
+        }
     }
 }
 
 struct FavouriteListView_Previews: PreviewProvider {
     static var previews: some View {
-        FavouriteListView()
+        FavoritesListView()
     }
 }

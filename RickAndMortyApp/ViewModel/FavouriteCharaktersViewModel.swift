@@ -4,18 +4,25 @@
 //
 //  Created by Kateřina Černá on 26.05.2023.
 //
+import CoreData
 import SwiftUI
 
-class FavoriteCharactersViewModel: ObservableObject {
-    @Published var characters: [Character] = []
+class FavoritesManager: ObservableObject {
+    @Published var favorites: [Character] = []
     
-    func addCharacterToFavorites(_ character: Character) {
-        characters.append(character)
+    func addFavorite(_ character: Character) {
+        favorites.append(character)
     }
     
-    func removeCharacterFromFavorites(_ character: Character) {
-        if let index = characters.firstIndex(where: { $0.name == character.name }) {
-            characters.remove(at: index)
+    func removeFavorite(_ character: Character) {
+        if let index = favorites.firstIndex(where: { $0.name == character.name }) {
+            favorites.remove(at: index)
         }
     }
+    
+    func isFavorite(_ character: Character) -> Bool {
+        return favorites.contains { $0.name == character.name }
+    }
 }
+
+

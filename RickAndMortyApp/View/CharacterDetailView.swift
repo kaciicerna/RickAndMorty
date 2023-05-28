@@ -7,6 +7,8 @@
 
 import SwiftUI
 import URLImage
+import CoreData
+
 
 struct CharacterDetailView: View {
     var name: String
@@ -18,8 +20,21 @@ struct CharacterDetailView: View {
     var location: String
     var imageURL: String
     
-    @State private var isFavorite: Bool = false
-    @EnvironmentObject var favoriteCharactersVM: FavoriteCharactersViewModel
+    var character: Character?
+    @EnvironmentObject private var favoritesManager: FavoritesManager
+    
+    var isFavorite: Bool {
+        return favoritesManager.isFavorite(character!)
+    }
+    
+    private func toggleFavorite() {
+        if isFavorite {
+            favoritesManager.removeFavorite(character!)
+        } else {
+            favoritesManager.addFavorite(character!)
+        }
+    }
+    
     
     var body: some View {
         VStack {
@@ -38,15 +53,20 @@ struct CharacterDetailView: View {
                             .font(.headline)
                         
                         Button(action: {
-                            isFavorite.toggle()
+                            if let character = character {
+                                toggleFavorite()
+                            }
                         }) {
-                            Image(systemName: isFavorite ? "star.fill" : "star")
-                                .foregroundColor(isFavorite ? .yellow : .gray)
+                            Image(systemName: character != nil && favoritesManager.isFavorite(character!) ? "star.fill" : "star")
+                                .foregroundColor(character != nil && favoritesManager.isFavorite(character!) ? .blue : .gray)
                                 .frame(width: 30, height: 30)
                         }
+
                     }
+                    
                     Text(name)
                         .font(.title2)
+                        .bold()
                 }
             }
             
@@ -81,7 +101,6 @@ struct CharacterDetailView: View {
     
     private var backButton: some View {
         Button(action: {
-            // Handle back button action
         }) {
             Image(systemName: "chevron.left")
         }

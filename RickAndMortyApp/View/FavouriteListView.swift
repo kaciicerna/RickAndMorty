@@ -11,24 +11,53 @@ import CoreData
 struct FavoritesListView: View {
     @Environment(\.managedObjectContext) private var viewContext
     @FetchRequest(entity: FavoriteCharacter.entity(), sortDescriptors: []) var favorites: FetchedResults<FavoriteCharacter>
+    @EnvironmentObject private var favoritesManager: FavoritesManager
+    @StateObject private var viewModel = CharacterListViewModel()
     
     var body: some View {
         NavigationView {
-            List {
-                ForEach(favorites) { favorite in
-                    NavigationLink(destination: CharacterDetailView(name: favorite.name ?? "",
-                                                                    status: favorite.status ?? "",
-                                                                    species: favorite.species ?? "",
-                                                                    type: "",
-                                                                    gender: "",
-                                                                    origin: "",
-                                                                    location: "",
-                                                                    imageURL: "")) {
+            if favorites.isEmpty {
+                Text("No favorites yet")
+                    .font(.headline)
+                    .foregroundColor(.gray)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .navigationBarTitle("Favorites")
+            } else {
+                List {
+                    ForEach(favorites) { favorite in
+                        NavigationLink(destination: CharacterDetailView(
+                            name: favorite.name ?? "",
+                            status: favorite.status ?? "",
+                            species: favorite.species ?? "",
+                            type: favorite.type ?? "",
+                            gender: favorite.gender ?? "",
+                            origin: favorite.origin ?? "",
+                            location: favorite.location ?? "",
+                            imageURL: favorite.image ?? "",
+                            viewModel: DetailCharacterViewModel(
+                                character: nil,
+                                favoritesManager: favoritesManager,
+                                managedObjectContext: viewContext
+                            )
+                        )) {
+                            RowListView(
+                                name: favorite.name ?? "",
+                                status: favorite.status ?? "",
+                                species: favorite.species ?? "",
+                                type: favorite.type ?? "",
+                                gender: favorite.gender ?? "",
+                                origin: favorite.origin ?? "",
+                                location: favorite.location ?? "",
+                                imageURL: favorite.image ?? ""
+                            )
+                        }
+                        .isDetailLink(false) 
                     }
+                    .onDelete(perform: deleteFavorites)
                 }
-                .onDelete(perform: deleteFavorites)
+                .navigationBarTitle("Favorites")
+                .onAppear(perform: viewModel.fetchCharacters)
             }
-            .navigationBarTitle("Favorites")
         }
     }
     
@@ -46,8 +75,9 @@ struct FavoritesListView: View {
     }
 }
 
-struct FavouriteListView_Previews: PreviewProvider {
+struct FavoritesListView_Previews: PreviewProvider {
     static var previews: some View {
         FavoritesListView()
     }
 }
+

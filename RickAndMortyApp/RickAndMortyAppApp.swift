@@ -6,42 +6,52 @@
 //
 
 import SwiftUI
+
 @main
 struct RickAndMortyAppApp: App {
     let persistenceController = PersistenceController.shared
     @StateObject private var favoritesManager = FavoritesManager()
-    
+    @State private var isHIconSelected = false
+    @State private var isSIconSelected = false
+
     var body: some Scene {
         WindowGroup {
             ZStack(alignment: .bottom) {
-                TabView {
+                TabView(selection: tabSelectionBinding) {
                     CharactersListView()
                         .environment(\.managedObjectContext, persistenceController.container.viewContext)
                         .environmentObject(favoritesManager)
                         .tabItem {
-                            Image("hIcon")
+                            Image(isHIconSelected ? "hIconP" : "hIcon")
                         }
-                    
+                        .tag(0)
+
                     FavoritesListView()
                         .environment(\.managedObjectContext, persistenceController.container.viewContext)
                         .environmentObject(favoritesManager)
                         .tabItem {
-                            Image("sIcon")
+                            Image(isSIconSelected ? "sIconP" : "sIcon")
                         }
+                        .tag(1)
                 }
-                
-                VStack {
-                    Spacer()
-                    GeometryReader { geometry in
-                        Color.clear
-                            .frame(height: 182)
-                            .frame(width: geometry.size.width - 62)
-                            .cornerRadius(31)
-                            .shadow(radius: 5)
-                    }
-                    .ignoresSafeArea(.all, edges: .bottom)
-                }
+                .background(.clear)
+            }
+            .onAppear {
+                isHIconSelected = true
             }
         }
     }
+
+    var tabSelectionBinding: Binding<Int> {
+        Binding<Int>(
+            get: {
+                isHIconSelected ? 0 : 1
+            },
+            set: { newValue in
+                isHIconSelected = newValue == 0
+                isSIconSelected = newValue == 1
+            }
+        )
+    }
 }
+
